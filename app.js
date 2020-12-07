@@ -11,6 +11,7 @@ const singleUser = require('./models/singleUser');
 const multer = require('multer');
 const fs = require('fs');
 const singleUserController = require('./controllers/singleUserController')
+const upload = require('./utils/fileUploader')
 
 
 var homeRouter = require('./routes/home');
@@ -28,26 +29,27 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public/uploads')));
-app.use(express.static(__dirname + '/public/uploads'))
+app.use(express.static(__dirname + '/public'))
 
 
 app.use('/', homeRouter);
 app.use('/singleUser', singleUserRouter);
 app.use('./auth', authenticationRouter);
 
-///video
-let upload = multer({ dest: __dirname + '/public/uploads/' });
+app.post('/api/test', upload.single('userRecordedVideoCV'), async (req, res, next) => {
+  const {file, fileValidationError} = req
+  if (!file) {
+    return res.status(400).send('Please upload a file'); // 400 Bad Request
+  }
+  if (fileValidationError) {
+    return res.status(400).send(fileValidationError);
+  }
+  console.log(file)
 
-app.post('/api/test', upload.single('userRecordedVideoCV'), (req, res, next) => {
-  req.params.id = req.body.userId;
-  req.body = {video: req.protocol + '://' + req.get('host') + '/public/uploads/'  + req.file.filename + '.webm'}
-  return next()
-}, 
+  const updatedUser = await singleUser.findByIdAndUpdate(req.body.userId, {video: req.file.filename}, { new: true })
 
-  singleUserController.update_user
- 
-);
+  res.send(updatedUser);
+});
 
 
 
