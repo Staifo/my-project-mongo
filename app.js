@@ -36,6 +36,8 @@ app.use('/', homeRouter);
 app.use('/singleUser', singleUserRouter);
 app.use('./auth', authenticationRouter);
 
+
+//video
 app.post('/api/test', upload.single('userRecordedVideoCV'), async (req, res, next) => {
   const {file, fileValidationError} = req
   if (!file) {
@@ -56,27 +58,26 @@ app.post('/api/test', upload.single('userRecordedVideoCV'), async (req, res, nex
 ///video & documents
 let fileupload = multer ({dest: __dirname + '/public/documents'});
 
- app.post('/fileupload', fileupload.single('profile_pic'), (req, res)=>{
-   console.log(req.file)
-   let image = fs.readFileSync(req.file.path);
+ app.post('/fileupload', fileupload.single('profile_pic'), async (req, res)=>{
+   const {file} = req
+  //  console.log(req.file)
+  //  let image = fs.readFileSync(req.file.path);
   //  let encode_img = img.toString('utf-8');
 
 //convert to json file
-   let finalImg = {
-     contentType: req.file.mimetype,
-     profile_pic: `<img src="/documents/${req.file.filename}"/>`
-    //  Buffer.from(encode_img, 'utf-8')
-   };
-   client.collection('profile_pic').insertOne(finalImg,( err, result) => {
-     console.log(result)
+  //  let finalImg = {
+  //    profile_pic: `/documents/${req.file.filename}`
+  //   //  Buffer.from(encode_img, 'utf-8')
+  //  };
+   const updatePic = await singleUser.findByIdAndUpdate(req.body.userId, {profile_pic: req.file.filename}, {new: true})
      if (err) return console.log(err)
      console.log('saved to database')
-     res.send(finalImg)
+     res.send(updatePic)
    })
 
   //  const template = `<img src="/documents/${req.file.filename}"/>`;
   //  res.send(image)
- })
+//  })
 
  app.get('/', (req, res)=>{
    res.sendFile(path.join(__dirname, 'fileUpload.js'))
