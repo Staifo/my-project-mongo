@@ -3,11 +3,11 @@ const path = require('path');
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './public/uploads')
+    cb(null, './public/documents')
   },
   filename: (req, file, cb) => {
-      // console.log({inMulter: req.body})
-    cb(null, req.body.userId + path.extname(file.originalname))
+    console.log({inMulter: req.body})
+    cb(null, `${req.body.type}-${req.body.userId}${path.extname(file.originalname)}`)
   }
 })
 
