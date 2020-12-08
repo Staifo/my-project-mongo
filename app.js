@@ -11,7 +11,8 @@ const singleUser = require('./models/singleUser');
 const multer = require('multer');
 const fs = require('fs');
 const singleUserController = require('./controllers/singleUserController')
-const upload = require('./utils/fileUploader')
+const videoUpload = require('./utils/fileUploader')
+const picUpload = require('./utils/picUploader')
 
 
 var homeRouter = require('./routes/home');
@@ -38,7 +39,22 @@ app.use('./auth', authenticationRouter);
 
 
 //video
-app.post('/api/test', upload.single('userRecordedVideoCV'), async (req, res, next) => {
+app.post('/api/test', videoUpload.single('userRecordedVideoCV'), async (req, res, next) => {
+  const {file, fileValidationError} = req
+  if (!file) {
+    return res.status(400).send('Please upload a file'); // 400 Bad Request
+  }
+  if (fileValidationError) {
+    return res.status(400).send(fileValidationError);
+  }
+  // console.log(file)
+
+  const updatedUser = await singleUser.findByIdAndUpdate(req.body.userId, {video: req.file.filename}, { new: true })
+
+  res.send(updatedUser);
+});
+
+ app.post('/fileupload', picUpload.single('userFile'), async (req, res)=>{
   const {file, fileValidationError} = req
   if (!file) {
     return res.status(400).send('Please upload a file'); // 400 Bad Request
@@ -48,40 +64,19 @@ app.post('/api/test', upload.single('userRecordedVideoCV'), async (req, res, nex
   }
   console.log(file)
 
-  const updatedUser = await singleUser.findByIdAndUpdate(req.body.userId, {video: req.file.filename}, { new: true })
+  // video / profile_pic / CV
+  console.log({userId: req.body.userId})
+  console.log({type: req.body.type})
+
+  const updatedUser = await singleUser.findByIdAndUpdate(req.body.userId, {[req.body.type]: req.file.filename}, { new: true })
 
   res.send(updatedUser);
-});
 
-
-
-///video & documents
-let fileupload = multer ({dest: __dirname + '/public/documents'});
-
- app.post('/fileupload', fileupload.single('profile_pic'), async (req, res)=>{
-   const {file} = req
-  //  console.log(req.file)
-  //  let image = fs.readFileSync(req.file.path);
-  //  let encode_img = img.toString('utf-8');
-
-//convert to json file
-  //  let finalImg = {
-  //    profile_pic: `/documents/${req.file.filename}`
-  //   //  Buffer.from(encode_img, 'utf-8')
-  //  };
-   const updatePic = await singleUser.findByIdAndUpdate(req.body.userId, {profile_pic: req.file.filename}, {new: true})
-     if (err) return console.log(err)
-     console.log('saved to database')
-     res.send(updatePic)
+  //  const updatePic = await singleUser.findByIdAndUpdate(req.body.userId, {profile_pic: req.file.filename}, {new: true})
+  //    if (err) return console.log(err)
+  //    console.log('saved to database')
+  //    res.send(updatePic)
    })
-
-  //  const template = `<img src="/documents/${req.file.filename}"/>`;
-  //  res.send(image)
-//  })
-
- app.get('/', (req, res)=>{
-   res.sendFile(path.join(__dirname, 'fileUpload.js'))
- })
  
 
 // catch 404 and forward to error handler
