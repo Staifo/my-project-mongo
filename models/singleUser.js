@@ -13,6 +13,7 @@ const singleUserSchema = new Schema ({
     video:{type: String},
     profile_pic:{type: String},
     CV:{type: String},
+    phone: {type: Number},
     transfer_skills:{type: String},
     coding_skills:{type: String},
     further_hard_skills:{type: String},

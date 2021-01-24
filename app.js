@@ -35,12 +35,12 @@ app.use(express.static(__dirname + '/public'))
 
 
 app.use('/', homeRouter);
-app.use('/singleUser', singleUserRouter);
+app.use('/api/singleUser', singleUserRouter);
 app.use('./auth', authenticationRouter);
 
 
 //video
-app.post('/videoUpload', videoUpload.single('userRecordedVideoCV'), async (req, res, next) => {
+app.post('/api/videoUpload', videoUpload.single('userRecordedVideoCV'), async (req, res, next) => {
   const {file, fileValidationError} = req
   if (!file) {
     return res.status(400).send('Please upload a file'); // 400 Bad Request
@@ -55,7 +55,7 @@ app.post('/videoUpload', videoUpload.single('userRecordedVideoCV'), async (req, 
   res.send(updatedUser);
 });
 
- app.post('/fileupload', picUpload.single('userFile'), async (req, res)=>{
+ app.post('/api/fileupload', picUpload.single('userFile'), async (req, res)=>{
   const {file, fileValidationError} = req
   if (!file) {
     return res.status(400).send('Please upload a file'); // 400 Bad Request
